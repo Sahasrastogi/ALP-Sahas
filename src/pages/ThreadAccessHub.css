@@ -1,0 +1,203 @@
+.thread-access-page {
+  min-height: 100vh;
+  width: min(100%, var(--page-max-width));
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 4rem) var(--page-gutter) var(--section-space);
+}
+
+.thread-access-hero {
+  margin-bottom: 1.75rem;
+}
+
+.thread-access-copy {
+  max-width: 48rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.thread-access-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  color: var(--accent-ink);
+  box-shadow: none;
+}
+
+.thread-access-copy h1 {
+  max-width: 13ch;
+  font-size: clamp(2.1rem, 5vw, 3.5rem);
+  line-height: 1.02;
+}
+
+.thread-access-copy p {
+  max-width: var(--measure-narrow);
+  line-height: 1.7;
+}
+
+.thread-access-notice {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.15rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: var(--warning-soft);
+}
+
+.thread-access-notice-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.thread-access-notice-copy strong {
+  color: var(--text-primary);
+}
+
+.thread-access-notice-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.thread-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: 1.25rem;
+}
+
+.thread-access-loading {
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  box-shadow: none;
+}
+
+.thread-access-card {
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+}
+
+.thread-access-cover {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin: 1.25rem 1.25rem 0;
+  box-shadow: 0 12px 20px rgba(28, 20, 12, 0.12);
+  background:
+    linear-gradient(180deg, rgba(28, 28, 28, 0.08), rgba(28, 28, 28, 0.12)),
+    var(--book-accent, #6f614d);
+}
+
+.thread-access-cover-image,
+.thread-access-cover-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.thread-access-cover-image {
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.thread-access-cover-fallback {
+  position: relative;
+  overflow: hidden;
+}
+
+.thread-access-cover-fallback::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 42%);
+}
+
+.thread-access-cover-spine {
+  position: absolute;
+  top: 0.85rem;
+  bottom: 0.85rem;
+  left: 0.85rem;
+  width: 1px;
+  background: rgba(255, 248, 236, 0.28);
+}
+
+.thread-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  margin-bottom: auto;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-0);
+  border: 1px solid rgba(255, 249, 240, 0.24);
+}
+
+.thread-status.unlocked {
+  background: rgba(223, 232, 221, 0.24);
+  color: #f5fff1;
+}
+
+.thread-status.quiz-required {
+  background: rgba(223, 227, 237, 0.22);
+  color: #f2f5ff;
+}
+
+.thread-status.read-required {
+  background: rgba(236, 223, 190, 0.24);
+  color: #fff8e8;
+}
+
+.thread-access-card-body {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.thread-access-title {
+  margin-top: -0.4rem;
+}
+
+.thread-access-author {
+  margin-top: -0.65rem;
+  color: var(--text-secondary);
+}
+
+.thread-access-synopsis {
+  line-height: 1.7;
+}
+
+.thread-access-rules {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.thread-rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-secondary);
+}
+
+.thread-rule.done {
+  color: var(--text-primary);
+}
+
+.thread-access-button {
+  width: fit-content;
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 900px) {
+  .thread-access-notice {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
