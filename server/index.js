@@ -7,8 +7,8 @@ import userRoutes from './routes/userRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
 import threadRoutes from './routes/threadRoutes.js';
 import registerSocketEvents from './socket/socketHandler.js';
-
-connectDB();
+import { Book } from './models/Book.js';
+import { defaultBooks } from './seed/defaultBooks.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -79,6 +79,23 @@ httpServer.on('error', (error) => {
   console.error('[SERVER] Fatal error:', error);
   process.exit(1);
 });
+
+const seedBooksIfEmpty = async () => {
+  if (process.env.DISABLE_STARTUP_SEED === 'true') {
+    return;
+  }
+
+  const count = await Book.countDocuments();
+  if (count > 0) {
+    return;
+  }
+
+  await Book.insertMany(defaultBooks);
+  console.log(`[SEED] Inserted ${defaultBooks.length} starter books.`);
+};
+
+await connectDB();
+await seedBooksIfEmpty();
 
 httpServer.listen(PORT, () => {
   console.log(`[SERVER] Nexus core listening on port ${PORT}`);
