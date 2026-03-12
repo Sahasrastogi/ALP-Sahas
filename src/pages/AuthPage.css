@@ -1,6 +1,6 @@
 .auth-page {
   min-height: 100vh;
-  padding: clamp(2.5rem, 6vw, 4rem) var(--page-gutter) var(--section-space);
+  padding: clamp(1.5rem, 4vw, 2.5rem) var(--page-gutter) var(--section-space);
 }
 
 .auth-shell {
@@ -127,6 +127,24 @@
   background: var(--danger-soft);
   border: 1px solid var(--border-soft);
   color: var(--text-primary);
+}
+
+.auth-warning {
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent-soft) 70%, transparent);
+  border: 1px solid var(--accent-border);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.auth-warning code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95em;
+  padding: 0.05rem 0.35rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  border: 1px solid var(--border-soft);
 }
 
 .auth-submit {

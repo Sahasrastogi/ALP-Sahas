@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import LandingPage from './pages/LandingPage';
 import BooksLibrary from './pages/BooksLibrary';
@@ -18,6 +18,18 @@ import './index.css';
 const THEME_STORAGE_KEY = 'atlp-ui-theme';
 const VALID_THEMES = ['light', 'sepia', 'dark'];
 
+const RequireMember = ({ currentUser, children }) => {
+  const location = useLocation();
+  const storedUser = getStoredUser();
+  const effectiveUser = currentUser && !currentUser.isAnonymous ? currentUser : storedUser;
+
+  if (!effectiveUser || effectiveUser.isAnonymous) {
+    return <Navigate to="/auth" replace state={{ from: location.pathname }} />;
+  }
+
+  return children;
+};
+
 const AppShell = ({ currentUser, onLogout, uiTheme, onThemeChange, onAuthSuccess }) => {
   const location = useLocation();
   const hideNavbar = location.pathname.startsWith('/read/');
@@ -31,10 +43,11 @@ const AppShell = ({ currentUser, onLogout, uiTheme, onThemeChange, onAuthSuccess
         <Routes>
           <Route path="/" element={<LandingPage currentUser={currentUser} />} />
           <Route path="/auth" element={<AuthPage currentUser={currentUser} onAuthSuccess={onAuthSuccess} />} />
-          <Route path="/books" element={<BooksLibrary />} />
-          <Route path="/meet" element={<MeetingAccessHub />} />
-          <Route path="/threads" element={<ThreadAccessHub />} />
-          <Route path="/read/:bookId" element={<ReadingRoom uiTheme={uiTheme} onThemeChange={onThemeChange} />} />
+          <Route path="/desk" element={<RequireMember currentUser={currentUser}><BooksLibrary /></RequireMember>} />
+          <Route path="/books" element={<Navigate to="/desk" replace />} />
+          <Route path="/meet" element={<MeetingAccessHub currentUser={currentUser} />} />
+          <Route path="/threads" element={<ThreadAccessHub currentUser={currentUser} />} />
+          <Route path="/read/:bookId" element={<RequireMember currentUser={currentUser}><ReadingRoom uiTheme={uiTheme} onThemeChange={onThemeChange} /></RequireMember>} />
           <Route path="/meet/:bookId" element={<MeetingHub />} />
           <Route path="/thread/:bookId" element={<BookThread />} />
           <Route path="/merch" element={<WizardMerch />} />

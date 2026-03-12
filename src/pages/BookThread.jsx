@@ -3,12 +3,14 @@ import { useLocation, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   BookOpen,
+  Heart,
   PenSquare,
   ScrollText,
   Send,
   Share2,
 } from 'lucide-react';
 import api from '../utils/api';
+import { getStoredUser } from '../utils/auth';
 import { getFallbackBookById } from '../utils/bookFallback';
 import BookCoverArt from '../components/books/BookCoverArt';
 import './BookThread.css';
@@ -59,13 +61,11 @@ const countReplies = (comments = []) => comments.reduce(
 
 const getChapterReferenceLabel = (value) => value?.trim() || 'Whole book';
 
-const getResonanceLabel = (count = 0) => {
-  if (!count) {
-    return null;
-  }
+const getHeartCount = (count = 0) => (count > 0 ? count : null);
 
-  return count === 1 ? '1 quiet appreciation' : `${count} quiet appreciations`;
-};
+const hasHeartFromActor = (likedBy, actorId) => (
+  Boolean(actorId && Array.isArray(likedBy) && likedBy.some((value) => String(value) === String(actorId)))
+);
 
 const getExcerpt = (text = '', maxLength = 260) => {
   const normalized = text.replace(/\s+/g, ' ').trim();
@@ -92,6 +92,7 @@ const ReplyTree = ({
   comments,
   depth = 0,
   threadId,
+  actorId,
   replyingTo,
   replyDrafts,
   pendingReplyKey,
@@ -111,7 +112,8 @@ const ReplyTree = ({
       const hasReplies = (comment.replies || []).length > 0;
       const canCollapseBranch = depth >= COLLAPSE_REPLY_DEPTH && hasReplies;
       const isBranchCollapsed = canCollapseBranch ? collapsedBranches[comment._id] !== false : false;
-      const appreciationLabel = getResonanceLabel(comment.likes || 0);
+      const heartCount = getHeartCount(comment.likes || 0);
+      const isHearted = hasHeartFromActor(comment.likedBy, actorId);
 
       return (
         <article
@@ -126,10 +128,13 @@ const ReplyTree = ({
               <time dateTime={comment.createdAt} className="reply-time">
                 {formatRelativeTime(comment.createdAt)}
               </time>
-              {appreciationLabel && (
+              {heartCount && (
                 <>
                   <span className="reply-dot" aria-hidden="true">/</span>
-                  <span className="reply-resonance">{appreciationLabel}</span>
+                  <span className="reply-resonance resonance-pill" aria-label={`${heartCount} hearts`}>
+                    <Heart size={14} aria-hidden="true" />
+                    <span>{heartCount}</span>
+                  </span>
                 </>
               )}
             </div>
@@ -142,8 +147,15 @@ const ReplyTree = ({
               <button type="button" className="reply-action" onClick={() => onToggleReply(isReplying ? null : replyKey)}>
                 Respond
               </button>
-              <button type="button" className="reply-action" onClick={() => onLikeComment(threadId, comment._id)}>
-                Appreciate
+              <button
+                type="button"
+                className={`reply-action like-button ${isHearted ? 'is-liked' : ''}`}
+                onClick={() => onLikeComment(threadId, comment._id)}
+                aria-pressed={isHearted}
+                title={isHearted ? 'Remove heart' : 'Send a heart'}
+              >
+                <Heart size={16} aria-hidden="true" fill={isHearted ? 'currentColor' : 'none'} />
+                {comment.likes > 0 && <span className="like-count">{comment.likes}</span>}
               </button>
               {replyCount > 0 && <span className="reply-action-meta">{getResponseCountLabel(replyCount)} continue below</span>}
               {canCollapseBranch && (
@@ -190,6 +202,7 @@ const ReplyTree = ({
                   comments={comment.replies}
                   depth={depth + 1}
                   threadId={threadId}
+                  actorId={actorId}
                   replyingTo={replyingTo}
                   replyDrafts={replyDrafts}
                   pendingReplyKey={pendingReplyKey}
@@ -212,6 +225,10 @@ const ReplyTree = ({
 export default function BookThread() {
   const { bookId } = useParams();
   const location = useLocation();
+  const actorId = useMemo(() => {
+    const stored = getStoredUser();
+    return stored?._id ? String(stored._id) : null;
+  }, []);
   const [book, setBook] = useState(null);
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -282,7 +299,8 @@ export default function BookThread() {
   );
 
   const selectedThreadReplyCount = countReplies(selectedThread?.comments || []);
-  const selectedThreadResonance = getResonanceLabel(selectedThread?.likes || 0);
+  const selectedThreadHearts = getHeartCount(selectedThread?.likes || 0);
+  const selectedThreadIsHearted = hasHeartFromActor(selectedThread?.likedBy, actorId);
 
   const setThreadInState = (updatedThread) => {
     setThreads((prev) => prev.map((thread) => (thread._id === updatedThread._id ? updatedThread : thread)));
@@ -390,7 +408,7 @@ export default function BookThread() {
       const { data } = await api.post(`/threads/${threadId}/like`);
       setThreadInState(data);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to appreciate this thread right now.');
+      setError(requestError.response?.data?.message || 'Unable to heart this thread right now.');
     }
   };
 
@@ -399,7 +417,7 @@ export default function BookThread() {
       const { data } = await api.post(`/threads/${threadId}/comments/${commentId}/like`);
       setThreadInState(data);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to appreciate this response right now.');
+      setError(requestError.response?.data?.message || 'Unable to heart this response right now.');
     }
   };
 
@@ -567,7 +585,7 @@ export default function BookThread() {
             <section className="thread-list-surface" aria-live="polite">
               {threads.length > 0 ? threads.map((thread) => {
                 const responseCount = countReplies(thread.comments || []);
-                const appreciationLabel = getResonanceLabel(thread.likes || 0);
+                const heartCount = getHeartCount(thread.likes || 0);
 
                 return (
                   <article key={thread._id} className="thread-list-item">
@@ -584,10 +602,13 @@ export default function BookThread() {
                         <p className="thread-list-preview">{getExcerpt(thread.content)}</p>
                         <div className="thread-list-footer">
                           <span>{getResponseCountLabel(responseCount)}</span>
-                          {appreciationLabel && (
+                          {heartCount && (
                             <>
                               <span className="reply-dot" aria-hidden="true">/</span>
-                              <span>{appreciationLabel}</span>
+                              <span className="reply-resonance resonance-pill" aria-label={`${heartCount} hearts`}>
+                                <Heart size={14} aria-hidden="true" />
+                                <span>{heartCount}</span>
+                              </span>
                             </>
                           )}
                         </div>
@@ -654,10 +675,13 @@ export default function BookThread() {
                 <time dateTime={selectedThread.createdAt}>{formatCalendarDate(selectedThread.createdAt)}</time>
                 <span className="reply-dot" aria-hidden="true">/</span>
                 <span>{getResponseCountLabel(selectedThreadReplyCount)}</span>
-                {selectedThreadResonance && (
+                {selectedThreadHearts && (
                   <>
                     <span className="reply-dot" aria-hidden="true">/</span>
-                    <span>{selectedThreadResonance}</span>
+                    <span className="reply-resonance resonance-pill" aria-label={`${selectedThreadHearts} hearts`}>
+                      <Heart size={14} aria-hidden="true" />
+                      <span>{selectedThreadHearts}</span>
+                    </span>
                   </>
                 )}
               </div>
@@ -669,8 +693,15 @@ export default function BookThread() {
               </div>
 
               <div className="thread-focus-actions">
-                <button type="button" className="reply-action" onClick={() => handleLikeThread(selectedThread._id)}>
-                  Appreciate
+                <button
+                  type="button"
+                  className={`reply-action like-button ${selectedThreadIsHearted ? 'is-liked' : ''}`}
+                  onClick={() => handleLikeThread(selectedThread._id)}
+                  aria-pressed={selectedThreadIsHearted}
+                  title={selectedThreadIsHearted ? 'Remove heart' : 'Send a heart'}
+                >
+                  <Heart size={16} aria-hidden="true" fill={selectedThreadIsHearted ? 'currentColor' : 'none'} />
+                  {selectedThread.likes > 0 && <span className="like-count">{selectedThread.likes}</span>}
                 </button>
                 <button
                   type="button"
@@ -736,6 +767,7 @@ export default function BookThread() {
                 <ReplyTree
                   comments={selectedThread.comments}
                   threadId={selectedThread._id}
+                  actorId={actorId}
                   replyingTo={replyingTo}
                   replyDrafts={replyDrafts}
                   pendingReplyKey={pendingReplyKey}

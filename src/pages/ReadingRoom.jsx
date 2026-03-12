@@ -61,7 +61,7 @@ const ReadingRoom = ({ uiTheme, onThemeChange }) => {
   const pagesLeftInChapter = Math.max(0, chapterEndPage - currentPage);
   const minutesLeftInChapter = Math.max(1, Math.round((pagesLeftInChapter + 0.25) * MINUTES_PER_PAGE));
   const authorFragment = book?.author?.split(' ')[1] || book?.author || 'the author';
-  const nextBookPath = book ? `/meet/${book._id || book.id}` : '/books';
+  const nextBookPath = book ? `/meet/${book._id || book.id}` : '/desk';
   const isDuneBook = book?.title?.trim().toLowerCase() === 'dune';
 
   const readingParagraphs = [
@@ -374,8 +374,8 @@ const ReadingRoom = ({ uiTheme, onThemeChange }) => {
   return (
     <div className={`reader-root theme-${uiTheme} animate-fade-in`}>
       <div className={`reader-toolbar ${chromeVisible ? 'is-visible' : ''} ${showSettings ? 'settings-open' : ''}`}>
-        <button type="button" onClick={() => navigate('/books')} className="back-btn">
-          <ChevronLeft size={18} /> Library
+        <button type="button" onClick={() => navigate('/desk')} className="back-btn">
+          <ChevronLeft size={18} /> The Desk
         </button>
 
         <div className="reader-book-title">
@@ -532,7 +532,7 @@ const ReadingRoom = ({ uiTheme, onThemeChange }) => {
 
       <footer className="reader-footer" aria-label="Reading progress">
         <span>Page {currentPage} of {TOTAL_PAGES}</span>
-        <span className="footer-divider" aria-hidden="true">·</span>
+        <span className="footer-divider" aria-hidden="true">Â·</span>
         <span>{minutesLeftInChapter} min left in chapter</span>
       </footer>
     </div>

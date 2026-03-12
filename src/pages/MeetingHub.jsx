@@ -7,7 +7,23 @@ import { getFallbackBookById } from '../utils/bookFallback';
 import { getBookAccessState, markQuizAsPassed, syncSingleBookAccess } from '../utils/readingAccess';
 import './MeetingHub.css';
 
-const socketServer = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+const socketServer = (() => {
+  const envUrl = import.meta.env.VITE_SOCKET_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+
+  if (import.meta.env.DEV && typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
+    return `${window.location.protocol}//${host}:5000`;
+  }
+
+  return 'http://127.0.0.1:5000';
+})();
 
 const MeetingHub = () => {
   const { bookId } = useParams();
@@ -20,6 +36,9 @@ const MeetingHub = () => {
   const [loading, setLoading] = useState(true);
   const [roomId, setRoomId] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [socketReady, setSocketReady] = useState(false);
+  const [matchNotice, setMatchNotice] = useState('');
+  const [searchHint, setSearchHint] = useState('');
   const socketRef = useRef(null);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -67,12 +86,21 @@ const MeetingHub = () => {
 
     socketRef.current = io(socketServer, {
       autoConnect: true,
-      reconnection: false,
+      reconnection: true,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 600,
       timeout: 3000,
+    });
+
+    socketRef.current.on('connect', () => {
+      setSocketReady(true);
+      setMatchNotice('');
     });
 
     socketRef.current.on('connect_error', (error) => {
       console.error('Socket connection failed:', error);
+      setSocketReady(false);
+      setMatchNotice('Live matching is offline right now. You can still enter the community thread.');
     });
 
     socketRef.current.on('match_found', ({ roomId: matchedRoomId }) => {
@@ -90,6 +118,23 @@ const MeetingHub = () => {
       }
     };
   }, [accessMode, bookId]);
+
+  useEffect(() => {
+    if (phase !== 'searching') {
+      setSearchHint('');
+      return undefined;
+    }
+
+    setSearchHint(`Waiting for another reader who chose ${prefType}.`);
+
+    const timeoutId = window.setTimeout(() => {
+      setSearchHint('Still waiting. Try again later, or step into the community thread.');
+    }, 12000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [phase, prefType]);
 
   if (loading) return <div className="p-10 text-center mt-20 font-serif">Deep in the archives... Seeking your book.</div>;
   if (!book) return <div className="p-10 text-center mt-20 font-serif">Book not found. Perhaps it's still being written?</div>;
@@ -118,14 +163,12 @@ const MeetingHub = () => {
 
   const handleStartSearch = () => {
     if (!socketRef.current?.connected) {
-      setMessages((prev) => [
-        ...prev,
-        { text: 'Live matching is unavailable right now. Please try again shortly.', sender: 'system', timestamp: new Date() },
-      ]);
+      setMatchNotice('Live matching is unavailable right now. Please try again shortly, or enter the community thread.');
       return;
     }
 
     setPhase('searching');
+    setMatchNotice('');
     socketRef.current.emit('join_matchmaking', {
       bookId,
       prefType,
@@ -202,8 +245,10 @@ const MeetingHub = () => {
 
             <div className="pref-options">
               <button
+                type="button"
                 className={`pref-card ${prefType === 'text' ? 'selected' : ''}`}
-                onClick={() => setPrefType('text')}
+                onClick={() => { setPrefType('text'); setMatchNotice(''); }}
+                aria-pressed={prefType === 'text'}
               >
                 <div className="pref-icon-wrapper"><MessageSquare size={32} /></div>
                 <h3>Text Chat</h3>
@@ -211,8 +256,10 @@ const MeetingHub = () => {
               </button>
 
               <button
+                type="button"
                 className={`pref-card ${prefType === 'voice' ? 'selected' : ''}`}
-                onClick={() => setPrefType('voice')}
+                onClick={() => { setPrefType('voice'); setMatchNotice(''); }}
+                aria-pressed={prefType === 'voice'}
               >
                 <div className="pref-icon-wrapper"><Mic size={32} /></div>
                 <h3>Voice Call</h3>
@@ -220,8 +267,10 @@ const MeetingHub = () => {
               </button>
 
               <button
+                type="button"
                 className={`pref-card ${prefType === 'video' ? 'selected' : ''}`}
-                onClick={() => setPrefType('video')}
+                onClick={() => { setPrefType('video'); setMatchNotice(''); }}
+                aria-pressed={prefType === 'video'}
               >
                 <div className="pref-icon-wrapper"><Video size={32} /></div>
                 <h3>Video Call</h3>
@@ -229,10 +278,16 @@ const MeetingHub = () => {
               </button>
             </div>
 
+            {matchNotice && (
+              <div className="meeting-notice" role="status">
+                {matchNotice}
+              </div>
+            )}
+
             <div className="mt-8 text-center flex-column-center gap-4">
               <button
                 className="btn-primary"
-                disabled={!prefType}
+                disabled={!prefType || !socketReady}
                 onClick={handleStartSearch}
               >
                 Find a reading partner <ArrowRight size={18} />
@@ -255,6 +310,7 @@ const MeetingHub = () => {
           </div>
           <h2 className="font-serif">Searching the cosmos...</h2>
           <p className="text-muted mt-2">Looking for someone who just finished <em>{book.title}</em></p>
+          {searchHint && <p className="text-muted">{searchHint}</p>}
           <button className="btn-secondary mt-8" onClick={() => setPhase('preferences')}>Cancel Search</button>
         </div>
       )}

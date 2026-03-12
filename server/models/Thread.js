@@ -4,6 +4,7 @@ const commentSchema = new mongoose.Schema({
   authorAnonId: String,
   content: { type: String, required: true },
   likes: { type: Number, default: 0 },
+  likedBy: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -38,6 +39,7 @@ const threadSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  likedBy: { type: [String], default: [] },
   comments: [commentSchema],
 }, { timestamps: true });
 

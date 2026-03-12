@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, LogIn, UserPlus, Sparkles } from 'lucide-react';
 import api from '../utils/api';
 import { saveAuthSession } from '../utils/auth';
@@ -25,13 +25,45 @@ const initialLoginState = {
 
 export default function AuthPage({ onAuthSuccess, currentUser }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState('login');
   const [loginForm, setLoginForm] = useState(initialLoginState);
   const [signupForm, setSignupForm] = useState(initialSignupState);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [serverOnline, setServerOnline] = useState(true);
 
   const isGuest = currentUser?.isAnonymous;
+  const redirectPath = location.state?.from || '/desk';
+
+  useEffect(() => {
+    if (currentUser && !currentUser.isAnonymous) {
+      navigate(redirectPath, { replace: true });
+    }
+  }, [currentUser, navigate, redirectPath]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const ping = async () => {
+      try {
+        await api.get('/health');
+        if (!cancelled) {
+          setServerOnline(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setServerOnline(false);
+        }
+      }
+    };
+
+    ping();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const introCopy = useMemo(() => {
     if (isGuest) {
       return 'Save your identity, keep your reading history, and sign in from any device.';
@@ -61,9 +93,14 @@ export default function AuthPage({ onAuthSuccess, currentUser }) {
       hydrateBookAccessForUser(user);
       const migratedUser = await syncBookAccessRecords(convertAccessStateToRecords(previousAccessState)).catch(() => user);
       onAuthSuccess(migratedUser || user);
-      navigate('/books');
+      navigate(redirectPath, { replace: true });
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to sign in right now.');
+      if (!requestError.response) {
+        setServerOnline(false);
+        setError('Cannot reach the ALP server. Start the backend with `node server/index.js` (port 5000), then try again.');
+      } else {
+        setError(requestError.response?.data?.message || 'Unable to sign in right now.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -92,9 +129,14 @@ export default function AuthPage({ onAuthSuccess, currentUser }) {
       hydrateBookAccessForUser(user);
       const migratedUser = await syncBookAccessRecords(convertAccessStateToRecords(previousAccessState)).catch(() => user);
       onAuthSuccess(migratedUser || user);
-      navigate('/books');
+      navigate(redirectPath, { replace: true });
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to create your account right now.');
+      if (!requestError.response) {
+        setServerOnline(false);
+        setError('Cannot reach the ALP server. Start the backend with `node server/index.js` (port 5000), then try again.');
+      } else {
+        setError(requestError.response?.data?.message || 'Unable to create your account right now.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -141,6 +183,12 @@ export default function AuthPage({ onAuthSuccess, currentUser }) {
               <UserPlus size={18} /> Sign up
             </button>
           </div>
+
+          {!serverOnline && !error && (
+            <div className="auth-warning" role="status">
+              The server is offline. Start the backend with <code>node server/index.js</code> and refresh.
+            </div>
+          )}
 
           {error && <div className="auth-error">{error}</div>}
 

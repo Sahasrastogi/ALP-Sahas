@@ -1,17 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, BookOpen, CheckCircle2, LockKeyhole, MessageSquare, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, LockKeyhole, MessageSquare, ShieldCheck } from 'lucide-react';
 import api from '../utils/api';
 import { getFallbackBooks } from '../utils/bookFallback';
 import { getBookAccessState } from '../utils/readingAccess';
 import BookCoverArt from '../components/books/BookCoverArt';
 import './ThreadAccessHub.css';
 
-const ThreadAccessHub = () => {
+const ThreadAccessHub = ({ currentUser }) => {
   const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState(null);
+  const isMember = Boolean(currentUser && !currentUser.isAnonymous);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -39,6 +40,11 @@ const ThreadAccessHub = () => {
   );
 
   const handleThreadAccess = (book) => {
+    if (!isMember) {
+      navigate('/auth');
+      return;
+    }
+
     const bookId = book._id || book.id;
     const access = getBookAccessState(bookId);
 
@@ -78,11 +84,8 @@ const ThreadAccessHub = () => {
             <MessageSquare size={16} />
             <span>Reader discussion access</span>
           </div>
-          <h1 className="font-serif">Choose a book and step into its reader-only thread.</h1>
-          <p>
-            Each thread is unlocked per book. Finish the book, pass the quiz, and you get a calmer,
-            spoiler-safe discussion space built for people who actually made it to the end.
-          </p>
+          <h1 className="font-serif">Step into the reader-only thread.</h1>
+          <p>Finish the book, pass the quiz once, and join the calm conversation.</p>
         </div>
       </section>
 
@@ -105,7 +108,7 @@ const ThreadAccessHub = () => {
 
       <section className="thread-access-grid">
         {loading ? (
-          <div className="thread-access-loading glass-panel">Loading thread access library...</div>
+          <div className="thread-access-loading glass-panel">Loading thread rooms...</div>
         ) : (
           bookCards.map(({ book, access }) => {
             const bookId = book._id || book.id;
@@ -129,14 +132,14 @@ const ThreadAccessHub = () => {
 
             return (
               <article key={bookId} className="thread-access-card glass-panel">
-                <div className="thread-access-cover" style={{ '--book-accent': book.coverColor || '#6f614d' }}>
+                <div className="thread-access-mini-cover" style={{ '--book-accent': book.coverColor || '#6f614d' }}>
                   <BookCoverArt
                     book={book}
-                    imgClassName="thread-access-cover-image"
-                    fallbackClassName="thread-access-cover-fallback"
+                    imgClassName="thread-access-mini-image"
+                    fallbackClassName="thread-access-mini-fallback"
                     showSpine
                     showPattern={false}
-                    spineClassName="thread-access-cover-spine"
+                    spineClassName="thread-access-mini-spine"
                   />
                 </div>
 
@@ -147,23 +150,11 @@ const ThreadAccessHub = () => {
                   </span>
                   <h2 className="font-serif thread-access-title">{book.title}</h2>
                   <p className="thread-access-author">{book.author}</p>
-                  <p className="thread-access-synopsis">{book.synopsis}</p>
-
-                  <div className="thread-access-rules">
-                    <div className={`thread-rule ${access.isRead ? 'done' : ''}`}>
-                      {access.isRead ? <CheckCircle2 size={16} /> : <BookOpen size={16} />}
-                      <span>Finish reading</span>
-                    </div>
-                    <div className={`thread-rule ${access.quizPassed ? 'done' : ''}`}>
-                      {access.quizPassed ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-                      <span>Pass quiz verification</span>
-                    </div>
-                  </div>
-
-                  <button className="btn-primary thread-access-button" onClick={() => handleThreadAccess(book)}>
-                    Enter Thread
-                  </button>
                 </div>
+
+                <button className="btn-primary sm thread-access-button" onClick={() => handleThreadAccess(book)}>
+                  {!isMember ? 'Sign in' : access.quizPassed ? 'Enter' : access.isRead ? 'Unlock' : 'Read first'}
+                </button>
               </article>
             );
           })

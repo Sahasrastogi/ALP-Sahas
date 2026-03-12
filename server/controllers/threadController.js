@@ -24,6 +24,30 @@ const findCommentById = (comments, commentId) => {
   return null;
 };
 
+const toggleLike = (entity, actorId) => {
+  if (!actorId) {
+    return { liked: false };
+  }
+
+  if (!Array.isArray(entity.likedBy)) {
+    entity.likedBy = [];
+  }
+
+  const actorKey = String(actorId);
+  const existingIndex = entity.likedBy.findIndex((value) => String(value) === actorKey);
+  const currentLikes = Number(entity.likes || 0);
+
+  if (existingIndex >= 0) {
+    entity.likedBy.splice(existingIndex, 1);
+    entity.likes = Math.max(0, currentLikes - 1);
+    return { liked: false };
+  }
+
+  entity.likedBy.push(actorKey);
+  entity.likes = currentLikes + 1;
+  return { liked: true };
+};
+
 export const getThreadsByBook = async (req, res) => {
   try {
     const threads = await Thread.find({ bookId: req.params.bookId })
@@ -57,6 +81,7 @@ export const createThread = async (req, res) => {
       chapterReference: chapterReference?.trim() || '',
       content: content.trim(),
       likes: 0,
+      likedBy: [],
       comments: [],
     });
 
@@ -82,6 +107,7 @@ export const addComment = async (req, res) => {
       authorAnonId: req.user ? req.user.anonymousId : 'Anonymous Reader',
       content,
       likes: 0,
+      likedBy: [],
       replies: [],
     };
 
@@ -110,7 +136,7 @@ export const likeThread = async (req, res) => {
       return res.status(404).json({ message: 'Thread not found' });
     }
 
-    thread.likes += 1;
+    toggleLike(thread, req.user?._id);
     await thread.save();
 
     res.json(thread);
@@ -131,7 +157,7 @@ export const likeComment = async (req, res) => {
       return res.status(404).json({ message: 'Comment not found' });
     }
 
-    comment.likes += 1;
+    toggleLike(comment, req.user?._id);
     await thread.save();
 
     res.json(thread);

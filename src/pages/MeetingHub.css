@@ -1,9 +1,9 @@
 .meeting-hub {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: clamp(2rem, 5vw, 3.5rem) var(--page-gutter) var(--section-space);
+  padding: clamp(1.25rem, 3.5vw, 2.25rem) var(--page-gutter) var(--section-space);
 }
 
 .text-accent {
@@ -36,7 +36,7 @@
 
 .quiz-gate-banner {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.45rem;
   width: fit-content;
   padding: 0.45rem 0.85rem;
@@ -134,12 +134,21 @@
   border: 1px solid var(--border-soft);
   background: transparent;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  cursor: pointer;
 }
 
 .pref-card:hover,
 .pref-card.selected {
   background: var(--surface-muted);
   border-color: var(--accent-border);
+}
+
+.pref-card.selected {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-border) 40%, transparent) inset;
+}
+
+.pref-card:active {
+  transform: translateY(1px);
 }
 
 .pref-icon-wrapper {
@@ -151,6 +160,11 @@
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent-ink);
+  line-height: 0;
+}
+
+.pref-icon-wrapper svg {
+  display: block;
 }
 
 .pref-card h3 {
@@ -160,6 +174,17 @@
 
 .pref-card p {
   font-size: var(--font-size-0);
+}
+
+.meeting-notice {
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--surface-muted) 70%, transparent);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  text-align: center;
 }
 
 .searching-container {
@@ -227,13 +252,13 @@
   border-radius: var(--radius-lg);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
 }
 
 .partner-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.85rem;
 }
 
@@ -257,7 +282,7 @@
 
 .room-actions {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
 }
 
@@ -345,5 +370,75 @@
   .room-actions {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* Small phones + narrow folds (iPhone SE, Galaxy Z Fold cover, Surface Duo) */
+@media (max-width: 420px) {
+  .meeting-hub {
+    padding: 1rem 0.85rem 1.75rem;
+  }
+
+  .quiz-card,
+  .preferences-content {
+    padding: 1.15rem 1rem;
+    gap: 1rem;
+  }
+
+  .quiz-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .quiz-input {
+    min-height: 8.5rem;
+    padding: 0.75rem 0.85rem;
+  }
+
+  .pref-options {
+    gap: 0.65rem;
+  }
+
+  .pref-card {
+    grid-template-columns: 2.6rem 1fr;
+    justify-items: start;
+    text-align: left;
+    gap: 0.75rem 0.9rem;
+    padding: 0.9rem 0.9rem;
+  }
+
+  .pref-icon-wrapper {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .pref-card h3 {
+    margin: 0;
+  }
+
+  .pref-card p {
+    margin: 0.2rem 0 0;
+  }
+
+  .meeting-notice {
+    padding: 0.75rem 0.9rem;
+  }
+
+  .room-main {
+    min-height: 24rem;
+  }
+}
+
+/* Landscape-on-folds: reduce vertical hunger (Surface Duo landscape, Fold landscape) */
+@media (max-height: 620px) and (max-width: 740px) {
+  .meeting-hub {
+    padding-top: 0.9rem;
+  }
+
+  .quiz-input {
+    min-height: 7.5rem;
+  }
+
+  .room-main {
+    min-height: 22rem;
   }
 }

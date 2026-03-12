@@ -111,6 +111,13 @@ cd "D:\After The Last Page"
 npm run dev -- --host
 ```
 
+Or run both together:
+
+```bash
+cd "D:\After The Last Page"
+npm run dev:full
+```
+
 The frontend will infer the API host automatically (useful for iPad/tablets on the same Wi‑Fi). You can also set `VITE_API_URL` explicitly if you prefer.
 
 ## Project Notes
@@ -126,4 +133,3 @@ The frontend will infer the API host automatically (useful for iPad/tablets on t
 - Production-grade auth + deployment configs
 - Meeting: matching rules, anti-abuse, session UX for text/voice/video
 - Wizard merch: generation pipeline + ordering + shipping integration
-

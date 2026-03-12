@@ -7,11 +7,16 @@ const baseURL = (() => {
     return envUrl;
   }
 
-  if (typeof window !== 'undefined' && window.location?.hostname) {
-    return `${window.location.protocol}//${window.location.hostname}:5000/api`;
+  if (import.meta.env.DEV) {
+    return '/api';
   }
 
-  return 'http://localhost:5000/api';
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname === 'localhost' ? '127.0.0.1' : window.location.hostname;
+    return `${window.location.protocol}//${host}:5000/api`;
+  }
+
+  return 'http://127.0.0.1:5000/api';
 })();
 
 const api = axios.create({

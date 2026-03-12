@@ -211,8 +211,8 @@ const BooksLibrary = () => {
     <div className="library-page animate-fade-in">
       <header className="library-hero">
         <div className="library-copy">
-          <h1 className="library-title font-serif">Your reading library</h1>
-          <p className="library-subtitle">Continue where you left off or browse your collection.</p>
+          <h1 className="library-title font-serif">Your Desk</h1>
+          <p className="library-subtitle">Resume where you left off or browse your shelf.</p>
         </div>
 
         <div className="library-controls">
@@ -220,7 +220,7 @@ const BooksLibrary = () => {
             <Search className="search-icon" size={18} />
             <input
               type="text"
-              placeholder="Search your books"
+              placeholder="Search your shelf"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               className="search-input"
@@ -313,8 +313,8 @@ const BooksLibrary = () => {
 
           <section className="library-section">
             <div className="section-heading">
-              <h2 className="font-serif">Your Library</h2>
-              <p>The full shelf, arranged as a calm cover grid.</p>
+              <h2 className="font-serif">Your Shelf</h2>
+              <p>Your books, arranged as a calm cover grid.</p>
             </div>
 
             <div className="books-shelf">
@@ -332,11 +332,6 @@ const BooksLibrary = () => {
           </section>
         </>
       )}
-
-      <section className="library-note">
-        <Clock3 size={16} />
-        <p>Progress and recent reading are kept intentionally quiet so the covers remain the center of gravity.</p>
-      </section>
     </div>
   );
 };

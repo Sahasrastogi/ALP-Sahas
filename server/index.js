@@ -14,7 +14,41 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      const allowList = new Set([
+        process.env.CLIENT_URL,
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+      ].filter(Boolean));
+
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowList.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      try {
+        const parsed = new URL(origin);
+        const hostname = parsed.hostname;
+        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+        const isPrivateLan = hostname.startsWith('192.168.')
+          || hostname.startsWith('10.')
+          || /^172\\.(1[6-9]|2\\d|3[0-1])\\./.test(hostname);
+
+        if ((isLocalhost || isPrivateLan) && parsed.port === '5173') {
+          callback(null, true);
+          return;
+        }
+      } catch {
+        // Fallthrough to reject.
+      }
+
+      callback(new Error(`Socket origin not allowed: ${origin}`));
+    },
     methods: ['GET', 'POST']
   }
 });
