@@ -26,15 +26,11 @@ const buildMockResponse = ({ userMessage, bookMeta }) => {
 };
 
 export const generateAgentReply = async ({ systemPrompt, bookMeta, retrievedChunks, history, userMessage }) => {
-  const provider = String(process.env.BOOKFRIEND_LLM_PROVIDER || 'mock')
-    .trim()
-    .replace(/^['"]|['"]$/g, '')
-    .toLowerCase();
+  const provider = (process.env.BOOKFRIEND_LLM_PROVIDER || 'mock').toLowerCase();
   const prompt = buildUserPrompt({ bookMeta, retrievedChunks, history, userMessage });
 
   if (provider === 'ollama') {
-    const ollamaUrl = process.env.BOOKFRIEND_OLLAMA_URL || 'http://127.0.0.1:11434/api/chat';
-    const response = await fetch(ollamaUrl, {
+    const response = await fetch(process.env.BOOKFRIEND_OLLAMA_URL || 'http://127.0.0.1:11434/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
