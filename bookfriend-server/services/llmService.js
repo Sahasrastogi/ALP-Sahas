@@ -28,6 +28,8 @@ const buildMockResponse = ({ userMessage, bookMeta }) => {
 
 export const generateAgentReply = async ({ systemPrompt, bookMeta, retrievedChunks, history, userMessage }) => {
   const provider = (process.env.BOOKFRIEND_LLM_PROVIDER || 'mock').toLowerCase();
+  console.log(provider);
+
   const prompt = buildUserPrompt({ bookMeta, retrievedChunks, history, userMessage });
 
   if (provider === 'ollama') {
