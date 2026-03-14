@@ -154,5 +154,4 @@ BookFriend is implemented as a separate service in `bookfriend-server/` and inte
 
 - See `BOOKFRIEND_INTERFACE.md` for API contracts, architecture, memory policy, and env setup.
 - Main server forwards to `BOOKFRIEND_SERVER_URL` (default `http://127.0.0.1:5050`).
-- If the BookFriend server is unavailable, the main API can optionally use local ephemeral fallback sessions (`BOOKFRIEND_FALLBACK_ENABLED=true`).
 

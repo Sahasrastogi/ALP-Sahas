@@ -43,7 +43,6 @@ const MeetingHub = () => {
   const [bookFriendOffered, setBookFriendOffered] = useState(false);
   const [bookFriendSessionId, setBookFriendSessionId] = useState(null);
   const [bookFriendLoading, setBookFriendLoading] = useState(false);
-  const [bookFriendMode, setBookFriendMode] = useState('');
   const socketRef = useRef(null);
 
   const peerRef = useRef(null);
@@ -498,7 +497,6 @@ const MeetingHub = () => {
       });
 
       setBookFriendSessionId(data.session_id);
-      setBookFriendMode(data.mode || 'remote');
       setMessages([]);
       setPhase('bookfriend');
     } catch (error) {
@@ -547,7 +545,6 @@ const MeetingHub = () => {
     }
 
     setBookFriendSessionId(null);
-    setBookFriendMode('');
     setMessages([]);
     setChatInput('');
     setBookFriendOffered(false);
@@ -707,9 +704,6 @@ const MeetingHub = () => {
               <div>
                 <h3 className="font-serif">BookFriend Connected</h3>
                 <p className="text-xs text-muted">Text-only reading companion for {book.title}</p>
-                {bookFriendMode === 'fallback' && (
-                  <p className="text-xs text-muted">Running in local fallback mode (BookFriend server unavailable).</p>
-                )}
               </div>
             </div>
             <div className="room-actions">

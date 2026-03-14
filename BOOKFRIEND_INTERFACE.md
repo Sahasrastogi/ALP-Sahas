@@ -72,11 +72,6 @@ Response:
 
 ## Main server proxy API
 
-### Fallback behavior
-
-If the standalone BookFriend service is temporarily unavailable (for example, not running in local dev), the main server now creates an **ephemeral in-process fallback session** so `/api/agent/start` does not fail with 502. This fallback is still temporary-memory only and is deleted on `/api/agent/end`.
-
-
 The main backend now exposes authenticated proxy endpoints:
 
 - `POST /api/agent/start`
@@ -98,7 +93,6 @@ In the Meet page:
 
 ### Main server (`server/.env`)
 - `BOOKFRIEND_SERVER_URL` (default: `http://127.0.0.1:5050`)
-- `BOOKFRIEND_FALLBACK_ENABLED` (default: `true`) to allow resilient local fallback when the BookFriend server is unreachable
 
 ### BookFriend server (`bookfriend-server/.env`)
 - `PORT` (default: `5050`)
