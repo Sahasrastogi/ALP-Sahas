@@ -1,20 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, LockKeyhole, MessageSquare, ShieldCheck } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { CheckCircle2, LockKeyhole, ShieldCheck } from 'lucide-react';
 import api from '../utils/api';
 import { getFallbackBooks } from '../utils/bookFallback';
 import { getBookAccessState } from '../utils/readingAccess';
+import { getDisplayBookTitle } from '../utils/bookTitle';
 import BookCoverArt from '../components/books/BookCoverArt';
 import './ThreadAccessHub.css';
 
 const ThreadAccessHub = ({ currentUser }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState(null);
   const isMember = Boolean(currentUser && !currentUser.isAnonymous);
-
-  const getDisplayTitle = (title) => String(title || '').split(':')[0].split(';')[0].trim();
+  const returnTo = `${location.pathname}${location.search}${location.hash}`;
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -56,7 +57,7 @@ const ThreadAccessHub = ({ currentUser }) => {
         title: 'Read the book first',
         message: `You need to finish ${book.title} before entering its community thread.`,
         actionLabel: 'Start Reading',
-        action: () => navigate(`/read/${bookId}`),
+        action: () => navigate(`/read/${bookId}`, { state: { returnTo } }),
       });
       return;
     }
@@ -82,10 +83,6 @@ const ThreadAccessHub = ({ currentUser }) => {
     <div className="thread-access-page animate-fade-in">
       <section className="thread-access-hero">
         <div className="thread-access-copy">
-          <div className="thread-access-badge glass-panel">
-            <MessageSquare size={16} />
-            <span>Reader discussion access</span>
-          </div>
           <h1 className="font-serif">Step into the reader-only thread.</h1>
           <p>Finish the book, pass the quiz once, and join the calm conversation.</p>
         </div>
@@ -147,7 +144,7 @@ const ThreadAccessHub = ({ currentUser }) => {
 
                 <div className="thread-access-card-body">
                   <h2 className="font-serif thread-access-title" title={book.title}>
-                    {getDisplayTitle(book.title)}
+                    {getDisplayBookTitle(book.title)}
                   </h2>
                   <p className="thread-access-author" title={book.author}>{book.author}</p>
                 </div>

@@ -1,11 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ShieldCheck, Users } from 'lucide-react';
+import { ArrowRight, LockKeyhole, ShieldCheck, Users } from 'lucide-react';
 import api from '../utils/api';
 import { getFallbackBooks } from '../utils/bookFallback';
 import { getAllBookAccessStates } from '../utils/readingAccess';
 import BookCoverArt from '../components/books/BookCoverArt';
 import './MeetingAccessHub.css';
+
+const LOCKED_ROOM_PREVIEWS = [
+  'Dracula Room',
+  'Frankenstein Room',
+  'Pride and Prejudice Room',
+  'Jane Eyre Room',
+];
 
 const MeetingAccessHub = ({ currentUser }) => {
   const navigate = useNavigate();
@@ -62,8 +69,8 @@ const MeetingAccessHub = ({ currentUser }) => {
             <span>Meet</span>
           </div>
 
-          <h1 className="font-serif">Readers who finished the book are already talking.</h1>
-          <p>Join discussions with people who reached the same final page.</p>
+          <h1 className="font-serif">The conversation begins after the last page.</h1>
+          <p>Join discussions with readers who reached the same ending.</p>
 
           <div className="meeting-access-gate-actions">
             <button type="button" className="btn-primary" onClick={() => navigate('/auth')}>
@@ -93,10 +100,10 @@ const MeetingAccessHub = ({ currentUser }) => {
           <Users size={16} />
           <span>Meet</span>
         </div>
-        <h1 className="font-serif">Readers who finished the book are already talking.</h1>
-        <p>Join discussions with people who reached the same final page.</p>
+        <h1 className="font-serif">The conversation begins after the last page.</h1>
+        <p>Join discussions with readers who reached the same ending.</p>
         <div className="meeting-access-hint">
-          <ShieldCheck size={16} /> Rooms appear here after you finish a book and pass its quiz once.
+          <ShieldCheck size={16} /> Rooms unlock after you finish a book.
         </div>
       </header>
 
@@ -137,13 +144,33 @@ const MeetingAccessHub = ({ currentUser }) => {
           ))}
         </section>
       ) : (
-        <section className="meeting-access-empty glass-panel">
-          <h2 className="font-serif">No unlocked meeting rooms yet.</h2>
-          <p>Finish a book and pass its quiz once. After that, its room will appear here.</p>
-          <button type="button" className="btn-primary" onClick={() => navigate('/desk')}>
-            Open The Desk
-          </button>
-        </section>
+        <>
+          <section className="meeting-access-empty" aria-labelledby="meet-empty-heading">
+            <h2 id="meet-empty-heading" className="font-serif">No rooms unlocked yet.</h2>
+            <p>Finish a book and pass its reflection quiz to unlock its discussion room.</p>
+            <button type="button" className="btn-primary" onClick={() => navigate('/desk')}>
+              Continue reading
+            </button>
+          </section>
+
+          <section className="meeting-access-locked" aria-labelledby="locked-rooms-heading">
+            <div className="meeting-access-section-heading">
+              <h2 id="locked-rooms-heading" className="font-serif">Rooms waiting for you</h2>
+            </div>
+
+            <div className="meeting-access-locked-grid" aria-label="Locked rooms preview">
+              {LOCKED_ROOM_PREVIEWS.map((roomName) => (
+                <article key={roomName} className="meeting-access-locked-card" aria-disabled="true">
+                  <div className="meeting-access-locked-copy">
+                    <h3 className="font-serif">{roomName}</h3>
+                    <span className="meeting-access-locked-label">Locked</span>
+                  </div>
+                  <LockKeyhole size={16} aria-hidden="true" />
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
       )}
     </div>
   );

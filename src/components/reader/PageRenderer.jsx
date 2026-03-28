@@ -6,12 +6,14 @@ const PageRenderer = ({
   pageTurnDirection,
   style,
   onPointerDown,
+  onPointerCancel,
   onPointerUp,
 }) => (
   <div
     ref={viewportRef}
     className="reader-page-viewport"
     onPointerDown={onPointerDown}
+    onPointerCancel={onPointerCancel}
     onPointerUp={onPointerUp}
   >
     <main

@@ -21,6 +21,7 @@
   width: 100%;
   height: 90vh;
   overflow: hidden;
+  touch-action: manipulation;
 }
 
 .reader-page-viewport .reader-content-wrapper {
@@ -39,8 +40,8 @@
 }
 
 .theme-dark {
-  background: #171614;
-  color: #e9e3d8;
+  background: #1c1712;
+  color: #f5f2ed;
 }
 
 .theme-light .reader-toolbar {
@@ -54,8 +55,8 @@
 }
 
 .theme-dark .reader-toolbar {
-  background: rgba(23, 22, 20, 0.84);
-  border-color: rgba(229, 229, 229, 0.12);
+  background: rgba(33, 26, 20, 0.84);
+  border-color: rgba(245, 242, 237, 0.1);
 }
 
 
@@ -78,12 +79,10 @@
 .theme-dark .reading-column strong,
 .theme-dark .reader-book-name,
 .theme-dark .chapter-title {
-  color: #e9e3d8;
+  color: #f5f2ed;
 }
 
 .theme-light .reader-overline,
-.theme-light .chapter-kicker,
-.theme-light .progress-info,
 .theme-light .reader-footer,
 .theme-light .settings-label,
 .theme-light .finish-banner p {
@@ -91,8 +90,6 @@
 }
 
 .theme-sepia .reader-overline,
-.theme-sepia .chapter-kicker,
-.theme-sepia .progress-info,
 .theme-sepia .reader-footer,
 .theme-sepia .settings-label,
 .theme-sepia .finish-banner p {
@@ -100,12 +97,10 @@
 }
 
 .theme-dark .reader-overline,
-.theme-dark .chapter-kicker,
-.theme-dark .progress-info,
 .theme-dark .reader-footer,
 .theme-dark .settings-label,
 .theme-dark .finish-banner p {
-  color: #bdb5aa;
+  color: #c8bfb2;
 }
 
 .theme-light .settings-panel {
@@ -119,13 +114,10 @@
 }
 
 .theme-dark .settings-panel {
-  background: rgba(25, 24, 22, 0.96);
-  border-color: rgba(229, 229, 229, 0.12);
+  background: rgba(34, 28, 22, 0.96);
+  border-color: rgba(245, 242, 237, 0.1);
 }
 
-.theme-light .toolbar-stepper,
-.theme-light .chapter-nav-btn,
-.theme-light .settings-btn,
 .theme-light .font-size-toggles,
 .theme-light .theme-btn,
 .theme-light .line-height-options button,
@@ -133,9 +125,6 @@
   background: rgba(60, 47, 28, 0.06);
 }
 
-.theme-sepia .toolbar-stepper,
-.theme-sepia .chapter-nav-btn,
-.theme-sepia .settings-btn,
 .theme-sepia .font-size-toggles,
 .theme-sepia .theme-btn,
 .theme-sepia .line-height-options button,
@@ -143,14 +132,11 @@
   background: rgba(73, 49, 24, 0.06);
 }
 
-.theme-dark .toolbar-stepper,
-.theme-dark .chapter-nav-btn,
-.theme-dark .settings-btn,
 .theme-dark .font-size-toggles,
 .theme-dark .theme-btn,
 .theme-dark .line-height-options button,
 .theme-dark .settings-close {
-  background: rgba(229, 229, 229, 0.06);
+  background: rgba(245, 242, 237, 0.06);
 }
 
 .theme-light ::selection {
@@ -162,11 +148,10 @@
 }
 
 .theme-dark ::selection {
-  background: rgba(215, 222, 244, 0.16);
+  background: rgba(214, 186, 154, 0.18);
 }
 
-.reader-toolbar,
-.reader-progress {
+.reader-toolbar {
   position: fixed;
   z-index: 1003;
 }
@@ -175,136 +160,113 @@
   left: 50%;
   transform: translateX(-50%);
   width: calc(100vw - 3rem);
-  max-width: 46rem;
-  border: 1px solid;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
-  top: 0.6rem;
+  max-width: 37rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: opacity 200ms ease-out, transform 200ms ease-out, border-color 200ms ease-out, background-color 200ms ease-out;
+  top: 0.65rem;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.45rem 0.7rem;
-  border-radius: 1.25rem;
+  gap: 0.45rem;
+  padding: 0.28rem 0.48rem;
+  border-radius: 0.95rem;
+  background: rgba(28, 23, 18, 0.26);
   opacity: 0;
-  transform: translate(-50%, -0.5rem);
+  transform: translate(-50%, -0.32rem);
   pointer-events: none;
 }
 
-.reader-toolbar.is-visible,
-.reader-toolbar.settings-open {
+.reader-toolbar.is-visible {
   opacity: 1;
   transform: translate(-50%, 0);
   pointer-events: auto;
 }
 
-.back-btn,
-.chapter-nav-btn,
-.settings-btn,
-.settings-close,
-.toolbar-stepper button,
-.line-height-options button,
-.theme-btn,
-.font-size-toggles button {
+.theme-light .reader-toolbar {
+  background: rgba(246, 243, 237, 0.58);
+  border-color: rgba(60, 47, 28, 0.06);
+}
+
+.theme-sepia .reader-toolbar {
+  background: rgba(239, 227, 194, 0.56);
+  border-color: rgba(73, 49, 24, 0.07);
+}
+
+.theme-dark .reader-toolbar {
+  background: rgba(33, 26, 20, 0.3);
+  border-color: rgba(245, 242, 237, 0.05);
+}
+
+.back-btn {
   border: 1px solid transparent;
   color: inherit;
   transition: background-color var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
 }
 
-.back-btn,
-.settings-btn {
-  min-height: 2.35rem;
-  padding: 0 0.75rem;
+.back-btn {
+  min-height: 2rem;
+  padding: 0 0.58rem;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.84rem;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  justify-self: start;
+  opacity: 0.84;
 }
 
-.toolbar-actions .settings-btn {
-  width: 2.35rem;
-  height: 2.35rem;
-  padding: 0;
-  justify-content: center;
+.back-btn:hover,
+.back-btn:focus-visible {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.035);
+  outline: none;
 }
 
 .reader-book-title {
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
   min-width: 0;
   text-align: center;
-  white-space: nowrap;
+}
+
+.reader-settings-trigger {
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  border: 1px solid transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  opacity: 0.78;
+  transition: background-color 200ms ease-out, border-color 200ms ease-out, opacity 200ms ease-out;
+}
+
+.reader-settings-trigger:hover,
+.reader-settings-trigger:focus-visible {
+  background: rgba(255, 255, 255, 0.035);
+  opacity: 1;
+  outline: none;
 }
 
 .reader-title-block {
   display: grid;
-  gap: 0.05rem;
+  gap: 0;
   min-width: 0;
   text-align: center;
 }
 
 .reader-overline {
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
+  font-size: 0.57rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-}
-
-.reader-book-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.98rem;
-}
-
-.chapter-nav-btn {
-  width: 2.3rem;
-  height: 2.3rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.chapter-nav-btn:disabled {
-  opacity: 0.34;
-  cursor: not-allowed;
-}
-
-.toolbar-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.toolbar-stepper {
-  min-height: 2.5rem;
-  padding: 0.2rem;
-  border-radius: 999px;
-  display: inline-grid;
-  grid-template-columns: auto auto auto;
-  align-items: center;
-  gap: 0.15rem;
-}
-
-.toolbar-stepper button {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.toolbar-stepper span {
-  min-width: 3.4rem;
-  text-align: center;
-  font-size: 0.78rem;
-  color: inherit;
+  opacity: 0.64;
 }
 
 .settings-backdrop {
@@ -313,7 +275,8 @@
   z-index: 1004;
   display: grid;
   place-items: center;
-  background: rgba(20, 18, 16, 0.08);
+  padding: 1rem;
+  background: rgba(28, 23, 18, 0.1);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
@@ -340,6 +303,15 @@
   line-height: 1.15;
 }
 
+.settings-close,
+.theme-btn,
+.line-height-options button,
+.font-size-toggles button {
+  border: 1px solid transparent;
+  color: inherit;
+  transition: background-color 180ms ease, border-color 180ms ease, opacity 180ms ease;
+}
+
 .settings-close {
   min-height: 2.15rem;
   padding: 0 0.9rem;
@@ -352,58 +324,25 @@
   gap: 0.55rem;
 }
 
+.settings-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.settings-subgroup {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.settings-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
 .settings-label {
   font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-
-.settings-link {
-  width: fit-content;
-  color: var(--accent-ink);
-  font-size: 0.88rem;
-  line-height: 1.45;
-  border-bottom: 1px solid transparent;
-  opacity: 0.9;
-  transition: border-color var(--transition-fast), opacity var(--transition-fast), color var(--transition-fast);
-}
-
-.settings-link:hover {
-  border-color: currentColor;
-  opacity: 1;
-  color: var(--text-primary);
-}
-
-.goto-form {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.goto-input {
-  flex: 1;
-  min-height: 2.6rem;
-  border-radius: 0.95rem;
-  padding: 0 0.85rem;
-  border: 1px solid rgba(128, 128, 128, 0.22);
-  background: rgba(128, 128, 128, 0.08);
-  outline: none;
-}
-
-.goto-input:focus {
-  border-color: rgba(70, 80, 107, 0.3);
-}
-
-.goto-submit {
-  min-height: 2.6rem;
-  padding: 0 0.95rem;
-  border-radius: 0.95rem;
-  border: 1px solid rgba(128, 128, 128, 0.22);
-  background: rgba(128, 128, 128, 0.08);
-}
-
-.goto-submit:hover {
-  background: rgba(128, 128, 128, 0.12);
 }
 
 .theme-toggles,
@@ -411,6 +350,10 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.45rem;
+}
+
+.line-height-options--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .theme-btn,
@@ -462,13 +405,13 @@
 .reader-content-wrapper {
   position: relative;
   overflow: hidden;
-  padding: clamp(2.25rem, 5vh, 3.25rem) calc(clamp(1rem, 3.2vw, 2.6rem) * var(--reader-margin-scale)) clamp(2.25rem, 5vh, 3.25rem);
+  padding: clamp(3.1rem, 7vh, 4.5rem) calc(clamp(1.1rem, 3vw, 2.4rem) * var(--reader-margin-scale)) clamp(3rem, 6vh, 4rem);
   font-family: var(--font-reading);
   letter-spacing: 0.01em;
 }
 
 .reading-column {
-  width: min(100%, 45rem);
+  width: min(100%, 41.5rem);
   margin: 0 auto;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
@@ -476,7 +419,9 @@
 }
 
 .reading-column.is-turning {
-  animation: readerPageTurn 200ms ease;
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
 }
 
 .reading-column.is-turning-next {
@@ -488,25 +433,40 @@
 }
 
 @keyframes readerPageTurnNext {
-  from { opacity: 0.92; transform: translateX(10px); }
+  from { opacity: 0.72; transform: translateX(18px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes readerPageTurnPrev {
-  from { opacity: 0.92; transform: translateX(-10px); }
+  from { opacity: 0.72; transform: translateX(-18px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
 .chapter-heading {
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 2.9rem;
   text-align: center;
-  padding-top: clamp(0.5rem, 2.2vw, 1.25rem);
+  padding-top: clamp(0.8rem, 2.4vw, 1.5rem);
 }
 
-.chapter-kicker {
-  margin-bottom: 0.65rem;
+.chapter-book,
+.chapter-progress {
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.chapter-book {
+  margin-bottom: 0.55rem;
   font-size: 0.72rem;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chapter-progress {
+  margin-bottom: 0.9rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   font-variant: all-small-caps;
   display: inline-flex;
@@ -515,26 +475,27 @@
   gap: 0.9rem;
 }
 
-.chapter-kicker::before,
-.chapter-kicker::after {
+.chapter-progress::before,
+.chapter-progress::after {
   content: '';
-  width: clamp(3.5rem, 10vw, 5.25rem);
+  width: clamp(3rem, 9vw, 4.5rem);
   height: 1px;
   background: currentColor;
-  opacity: 0.18;
+  opacity: 0.14;
 }
 
 .chapter-title {
-  font-size: clamp(2rem, 4.4vw, 3.05rem);
-  line-height: 1.06;
-  max-width: 100%;
+  font-size: clamp(2.1rem, 4vw, 3.15rem);
+  line-height: 1.08;
+  max-width: 20ch;
   margin: 0 auto;
-  white-space: nowrap;
+  white-space: normal;
+  text-wrap: balance;
 }
 
 .reading-column p {
   max-width: none;
-  margin: 0 auto 1.42em;
+  margin: 0 auto 1.6em;
   color: inherit;
   text-indent: 0;
   text-align: justify;
@@ -558,35 +519,34 @@
 
   .reader-toolbar {
     top: 0.35rem;
-    padding: 0.34rem 0.52rem;
-    gap: 0.4rem;
-    border-radius: 0.75rem;
+    padding: 0.24rem 0.4rem;
+    gap: 0.32rem;
+    border-radius: 0.72rem;
   }
 
   .back-btn,
-  .settings-btn {
-    min-height: 2.1rem;
-    padding: 0 0.6rem;
-    font-size: 0.78rem;
+  .reader-settings-trigger {
+    min-height: 1.9rem;
   }
 
-  .toolbar-actions .settings-btn {
-    width: 2.1rem;
-    height: 2.1rem;
-    padding: 0;
+  .back-btn {
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .reader-settings-trigger {
+    width: 1.9rem;
+    min-width: 1.9rem;
+    height: 1.9rem;
   }
 
   .reader-toolbar svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .reader-book-name {
-    font-size: 0.88rem;
+    width: 14px;
+    height: 14px;
   }
 
   .reader-overline {
-    font-size: 0.62rem;
+    font-size: 0.55rem;
   }
 
   .chapter-heading {
@@ -653,75 +613,34 @@
   font-weight: 600;
 }
 
-.reader-progress {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  transform: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  pointer-events: none;
-  opacity: 0.9;
-}
-
-.reader-progress.is-visible {
-  opacity: 1;
-}
-
-.progress-info {
-  position: fixed;
-  right: 1rem;
-  bottom: 0.8rem;
-  display: flex;
-  gap: 0.75rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.reader-progress.is-visible .progress-info {
-  opacity: 0.62;
-}
-
 .reader-footer {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 0.55rem;
+  bottom: 0.85rem;
   z-index: 1001;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  gap: 0.45rem;
+  padding: 0.22rem 0.4rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: currentColor;
-  opacity: 0.42;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+  white-space: nowrap;
+  transform: translate(-50%, 0.25rem);
+}
+
+.reader-footer.is-visible {
+  opacity: 0.5;
+  transform: translate(-50%, 0);
 }
 
 .footer-divider {
-  opacity: 0.6;
-}
-
-
-.progress-bar-container {
-  height: 2px;
-  background: rgba(128, 128, 128, 0.14);
-  border-radius: 0;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: currentColor;
   opacity: 0.42;
-  transition: width var(--transition-fast);
 }
 
 .finish-banner {
@@ -739,7 +658,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(28, 22, 18, 0.18);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -757,7 +676,7 @@
 }
 
 .theme-dark .finish-overlay .finish-banner {
-  background: rgba(25, 24, 22, 0.84);
+  background: rgba(33, 26, 20, 0.88);
 }
 
 .finish-icon {
@@ -773,35 +692,6 @@
 @media (max-width: 560px) {
   .reader-toolbar {
     width: calc(100vw - 1rem);
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .back-btn,
-  .toolbar-actions {
-    justify-self: start;
-  }
-
-  .reader-book-title {
-    width: 100%;
-  }
-
-  .reader-progress {
-    width: 100%;
-  }
-}
-
-@media (max-width: 560px) {
-  .toolbar-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .toolbar-stepper {
-    flex: 1;
-  }
-
-  .progress-info {
-    right: 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   }
 }

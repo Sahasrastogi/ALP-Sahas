@@ -3,12 +3,12 @@
   margin: 0 auto;
   padding: 1.15rem var(--page-gutter) var(--section-space);
   display: grid;
-  gap: 1.1rem;
+  gap: 1.15rem;
 }
 
 .profile-head {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.3rem;
   max-width: 52ch;
 }
 
@@ -22,8 +22,26 @@
   border-radius: var(--radius-lg);
   padding: 1rem 1.1rem;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.72rem;
   max-width: 42rem;
+}
+
+.profile-section-head {
+  display: grid;
+  gap: 0.22rem;
+  padding-bottom: 0.1rem;
+}
+
+.profile-section-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.profile-section-head p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+  font-size: var(--font-size-1);
 }
 
 .profile-row {
@@ -47,6 +65,16 @@
   font-size: var(--font-size-1);
   justify-self: end;
   text-align: right;
+}
+
+.profile-actions {
+  max-width: 42rem;
+  padding-top: 0.15rem;
+}
+
+.profile-logout {
+  min-height: 2.6rem;
+  padding-inline: 1rem;
 }
 
 @media (max-width: 560px) {

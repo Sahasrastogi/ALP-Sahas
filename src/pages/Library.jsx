@@ -1,14 +1,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import api from '../utils/api';
+import { getDisplayBookTitle } from '../utils/bookTitle';
 import BookCoverArt from '../components/books/BookCoverArt';
 import './Library.css';
 
 const LibraryPage = () => {
+  const location = useLocation();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const returnTo = `${location.pathname}${location.search}${location.hash}`;
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -26,15 +30,29 @@ const LibraryPage = () => {
   }, []);
 
   const filteredBooks = useMemo(() => {
-    if (!searchTerm.trim()) return books;
+    const term = searchTerm.trim().toLowerCase();
 
-    const term = searchTerm.toLowerCase();
-    return books.filter(book =>
-      book.title.toLowerCase().includes(term) ||
-      book.author.toLowerCase().includes(term) ||
-      (book.tags && book.tags.some(tag => tag.toLowerCase().includes(term)))
-    );
-  }, [books, searchTerm]);
+    return books.filter((book) => {
+      const matchesSearch = !term
+        || book.title.toLowerCase().includes(term)
+        || book.author.toLowerCase().includes(term)
+        || (book.tags && book.tags.some((tag) => tag.toLowerCase().includes(term)));
+
+      const matchesFilter = activeFilter === 'All'
+        || (book.tags && book.tags.some((tag) => tag.toLowerCase().includes(activeFilter.toLowerCase())));
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [books, searchTerm, activeFilter]);
+
+  const metadataLine = useMemo(() => {
+    if (!books.length) {
+      return null;
+    }
+
+    const uniqueAuthors = new Set(books.map((book) => book.author).filter(Boolean));
+    return `${books.length} titles · ${uniqueAuthors.size} authors · Public domain classics`;
+  }, [books]);
 
   if (loading) {
     return (
@@ -52,18 +70,38 @@ const LibraryPage = () => {
           <p className="library-subtitle">
             Browse our complete collection of {books.length} books
           </p>
+          {metadataLine && (
+            <p className="library-meta text-sm">
+              {metadataLine}
+            </p>
+          )}
         </div>
 
         <div className="library-controls">
-          <div className="search-bar">
-            <Search size={18} className="search-icon" />
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search by title, author or genre..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+          <div className="library-search-group">
+            <div className="search-bar">
+              <Search size={18} className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search by title, author or genre..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="library-filters" aria-label="Library categories">
+              {['All', 'Romance', 'Classic Literature', 'Science Fiction', 'Fantasy', 'Philosophy', 'Adventure', 'Gothic', 'History'].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`library-chip ${activeFilter === label ? 'active' : ''}`}
+                  onClick={() => setActiveFilter(label)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -71,7 +109,7 @@ const LibraryPage = () => {
       <div className="library-section">
         <div className="section-heading">
           <h2>All Books</h2>
-          {searchTerm && (
+          {(searchTerm || activeFilter !== 'All') && (
             <p>
               {filteredBooks.length} book{filteredBooks.length !== 1 ? 's' : ''} found
             </p>
@@ -85,7 +123,7 @@ const LibraryPage = () => {
         ) : (
           <div className="books-grid">
             {filteredBooks.map((book) => (
-              <BookCard key={book._id} book={book} />
+              <BookCard key={book._id} book={book} returnTo={returnTo} />
             ))}
           </div>
         )}
@@ -94,7 +132,7 @@ const LibraryPage = () => {
   );
 };
 
-const BookCard = ({ book }) => {
+const BookCard = ({ book, returnTo }) => {
   const bookId = book._id;
 
   return (
@@ -112,14 +150,14 @@ const BookCard = ({ book }) => {
       </div>
 
       <div className="book-info">
-        <h3 className="book-title">{book.title}</h3>
+        <h3 className="book-title" title={book.title}>{getDisplayBookTitle(book.title)}</h3>
         <p className="book-author">{book.author}</p>
         <div className="book-tags">
           {book.tags && book.tags.slice(0, 3).map((tag, index) => (
             <span key={index} className="book-tag">{tag}</span>
           ))}
         </div>
-        <Link to={`/read/${bookId}`} className="btn-read">
+        <Link to={`/read/${bookId}`} state={{ returnTo }} className="btn-read">
           Read this book
         </Link>
       </div>

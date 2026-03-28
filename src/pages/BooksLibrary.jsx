@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { BookOpen, ChevronLeft, ChevronRight, Clock3, Search, Bookmark, BookmarkCheck } from 'lucide-react';
 import api from '../utils/api';
 import { getFallbackBooks } from '../utils/bookFallback';
 import { getLibraryState, toggleBookOnShelf, getUserShelf } from '../utils/readingSession';
+import { getDisplayBookTitle } from '../utils/bookTitle';
 import BookCoverArt from '../components/books/BookCoverArt';
 import './BooksLibrary.css';
 
@@ -12,6 +13,18 @@ const getBookId = (book) => book._id || book.id;
 const getProgressLabel = (book) => {
   if (book.session?.progressPercent > 0 && book.session?.progressPercent < 100) {
     return `Continue from page ${book.session.currentPage}`;
+  }
+
+  if (book.access?.isRead) {
+    return 'Finished';
+  }
+
+  return `${book.minReadHours || 2}h reading time`;
+};
+
+const getContinueCardMetaLabel = (book) => {
+  if (book.session?.progressPercent > 0 && book.session?.progressPercent < 100) {
+    return `Last read: page ${book.session.currentPage}`;
   }
 
   if (book.access?.isRead) {
@@ -35,7 +48,7 @@ const renderCoverArt = (book) => {
   );
 };
 
-const FeaturedContinue = ({ book }) => {
+const FeaturedContinue = ({ book, returnTo }) => {
   if (!book) {
     return (
       <div className="section-empty">
@@ -46,11 +59,12 @@ const FeaturedContinue = ({ book }) => {
   }
 
   const bookId = getBookId(book);
+  const displayTitle = getDisplayBookTitle(book.title);
   const progressPercent = book.session?.progressPercent || (book.access?.isRead ? 100 : 0);
 
   return (
     <article className="featured-continue-card">
-      <Link to={`/read/${bookId}`} className="featured-continue-cover" aria-label={`Open ${book.title}`}>
+      <Link to={`/read/${bookId}`} state={{ returnTo }} className="featured-continue-cover" aria-label={`Open ${book.title}`}>
         <div className="featured-continue-cover-art" style={{ '--book-accent': book.coverColor || '#6f614d' }}>
           {renderCoverArt(book)}
         </div>
@@ -58,9 +72,9 @@ const FeaturedContinue = ({ book }) => {
 
       <div className="featured-continue-copy">
         <span className="featured-continue-kicker">Pick up where you left off</span>
-        <h3 className="featured-continue-title font-serif">{book.title}</h3>
+        <h3 className="featured-continue-title font-serif" title={book.title}>{displayTitle}</h3>
         <p className="featured-continue-author">{book.author}</p>
-        <p className="featured-continue-progress">{getProgressLabel(book)}</p>
+        <p className="featured-continue-progress">{getContinueCardMetaLabel(book)}</p>
         {progressPercent > 0 && progressPercent < 100 && (
           <div className="featured-continue-meter" aria-label={`Reading progress ${progressPercent}%`}>
             <div className="featured-continue-meter-fill" style={{ width: `${progressPercent}%` }} />
@@ -69,18 +83,18 @@ const FeaturedContinue = ({ book }) => {
       </div>
 
       <div className="featured-continue-action">
-        <Link to={`/read/${bookId}`} className="btn-resume">
-          Resume
+        <Link to={`/read/${bookId}`} state={{ returnTo }} className="btn-resume">
+          Resume reading
         </Link>
       </div>
     </article>
   );
 };
 
-const BookEntry = ({ book, compact = false, onToggleShelf, isSaved }) => {
+const BookEntry = ({ book, compact = false, onToggleShelf, isSaved, returnTo }) => {
   const bookId = getBookId(book);
   const progressPercent = book.session?.progressPercent || (book.access?.isRead ? 100 : 0);
-  const displayTitle = (book.title || '').split(';')[0].trim();
+  const displayTitle = getDisplayBookTitle(book.title);
 
   const handleToggleShelf = (e) => {
     e.preventDefault();
@@ -90,7 +104,7 @@ const BookEntry = ({ book, compact = false, onToggleShelf, isSaved }) => {
   };
 
   return (
-    <Link to={`/read/${bookId}`} className={`book-entry ${compact ? 'compact' : ''}`}>
+    <Link to={`/read/${bookId}`} state={{ returnTo }} className={`book-entry ${compact ? 'compact' : ''}`}>
       <article className="book-object">
         <div className="book-cover-wrap" style={{ '--book-accent': book.coverColor || '#6f614d' }}>
           {renderCoverArt(book)}
@@ -130,7 +144,7 @@ const BookEntry = ({ book, compact = false, onToggleShelf, isSaved }) => {
   );
 };
 
-const Section = ({ title, subtitle, books, compact = false, onToggleShelf, userShelfIds }) => {
+const Section = ({ title, subtitle, books, compact = false, onToggleShelf, userShelfIds, returnTo }) => {
   if (!books.length) {
     return null;
   }
@@ -150,6 +164,7 @@ const Section = ({ title, subtitle, books, compact = false, onToggleShelf, userS
             compact={compact} 
             onToggleShelf={onToggleShelf}
             isSaved={userShelfIds ? userShelfIds.has(getBookId(book)) : false}
+            returnTo={returnTo}
           />
         ))}
       </div>
@@ -158,6 +173,7 @@ const Section = ({ title, subtitle, books, compact = false, onToggleShelf, userS
 };
 
 const BooksLibrary = () => {
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('All');
   const [tagPage, setTagPage] = useState(0);
@@ -165,6 +181,7 @@ const BooksLibrary = () => {
   const [loading, setLoading] = useState(true);
   const [recommendationState, setRecommendationState] = useState({ loading: false, currentBookId: null, recommendations: null });
   const [userShelfIds, setUserShelfIds] = useState(new Set(getUserShelf()));
+  const returnTo = `${location.pathname}${location.search}${location.hash}`;
 
   const handleToggleShelf = (bookId) => {
     const newShelf = toggleBookOnShelf(bookId);
@@ -363,50 +380,52 @@ const BooksLibrary = () => {
     <div className="library-page animate-fade-in">
       <header className="library-hero">
         <div className="library-controls">
-          <label className="search-bar">
-            <Search className="search-icon" size={18} />
-            <input
-              type="text"
-              placeholder="Search your shelf"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              className="search-input"
-            />
-          </label>
+          <div className="library-tools">
+            <label className="search-bar">
+              <Search className="search-icon" size={18} />
+              <input
+                type="text"
+                placeholder="Search your shelf"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="search-input"
+              />
+            </label>
 
-          <div className="filter-carousel" aria-label="Categories">
-            <button
-              type="button"
-              className="carousel-btn"
-              onClick={() => setTagPage((page) => Math.max(0, page - 1))}
-              disabled={tagPage === 0}
-              aria-label="Show previous categories"
-            >
-              <ChevronLeft size={18} />
-            </button>
+            <div className="filter-carousel" aria-label="Categories">
+              <button
+                type="button"
+                className="carousel-btn"
+                onClick={() => setTagPage((page) => Math.max(0, page - 1))}
+                disabled={tagPage === 0}
+                aria-label="Show previous categories"
+              >
+                <ChevronLeft size={18} />
+              </button>
 
-            <div className="filter-tags" role="list">
-              {visibleTags.map((tag) => (
-                <button
-                  key={tag}
-                  className={`tag-btn ${selectedTag === tag ? 'active' : ''}`}
-                  onClick={() => setSelectedTag(tag)}
-                  type="button"
-                >
-                  {tag}
-                </button>
-              ))}
+              <div className="filter-tags" role="list">
+                {visibleTags.map((tag) => (
+                  <button
+                    key={tag}
+                    className={`tag-btn ${selectedTag === tag ? 'active' : ''}`}
+                    onClick={() => setSelectedTag(tag)}
+                    type="button"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="carousel-btn"
+                onClick={() => setTagPage((page) => Math.min(maxTagPage, page + 1))}
+                disabled={tagPage === maxTagPage}
+                aria-label="Show more categories"
+              >
+                <ChevronRight size={18} />
+              </button>
             </div>
-
-            <button
-              type="button"
-              className="carousel-btn"
-              onClick={() => setTagPage((page) => Math.min(maxTagPage, page + 1))}
-              disabled={tagPage === maxTagPage}
-              aria-label="Show more categories"
-            >
-              <ChevronRight size={18} />
-            </button>
           </div>
         </div>
       </header>
@@ -446,7 +465,7 @@ const BooksLibrary = () => {
             <div className="section-heading">
               <h2 className="font-serif">Continue Reading</h2>
             </div>
-            <FeaturedContinue book={libraryState.continueReading[0] || libraryState.recentlyOpened[0] || null} />
+            <FeaturedContinue book={libraryState.continueReading[0] || libraryState.recentlyOpened[0] || null} returnTo={returnTo} />
           </section>
 
           <section className="library-section">
@@ -463,6 +482,7 @@ const BooksLibrary = () => {
                     book={book}
                     onToggleShelf={handleToggleShelf}
                     isSaved={userShelfIds.has(getBookId(book))}
+                    returnTo={returnTo}
                   />
                 ))}
               </div>
@@ -470,14 +490,24 @@ const BooksLibrary = () => {
               <div className="no-results" style={{ minHeight: '12rem' }}>
                 <BookOpen size={32} className="text-muted" />
                 <h3 className="font-serif">Your shelf is empty.</h3>
-                <p>Start adding books you love.</p>
+                <p>Books you choose will live here. Start building your quiet library.</p>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setSelectedTag('All');
+                    setSearchTerm('');
+                  }}
+                >
+                  Add books
+                </button>
               </div>
             )}
           </section>
 
           {recommendationShelves && (() => {
             const baseBook = books.find((book) => getBookId(book) === recommendationState.currentBookId) || null;
-            const baseTitle = baseBook?.title || 'a book you opened';
+            const baseTitle = getDisplayBookTitle(baseBook?.title) || 'a book you opened';
             const baseAuthor = baseBook?.author || 'this author';
             return (
               <>
@@ -488,14 +518,22 @@ const BooksLibrary = () => {
                   compact
                   onToggleShelf={handleToggleShelf}
                   userShelfIds={userShelfIds}
+                  returnTo={returnTo}
                 />
                 <Section
-                  title={`Because you read ${baseTitle}`}
+                  title={(
+                    <span className="section-heading-inline">
+                      <span>Readers of</span>
+                      <span className="section-heading-title-chip" title={baseTitle}>{baseTitle}</span>
+                      <span>also enjoy</span>
+                    </span>
+                  )}
                   subtitle="Stories with similar tags and themes."
                   books={recommendationShelves.basedOnBook}
                   compact
                   onToggleShelf={handleToggleShelf}
                   userShelfIds={userShelfIds}
+                  returnTo={returnTo}
                 />
                 <Section
                   title={`More from ${baseAuthor}`}
@@ -504,6 +542,7 @@ const BooksLibrary = () => {
                   compact
                   onToggleShelf={handleToggleShelf}
                   userShelfIds={userShelfIds}
+                  returnTo={returnTo}
                 />
                 <Section
                   title="More in this genre"
@@ -512,6 +551,7 @@ const BooksLibrary = () => {
                   compact
                   onToggleShelf={handleToggleShelf}
                   userShelfIds={userShelfIds}
+                  returnTo={returnTo}
                 />
               </>
             );
@@ -524,6 +564,7 @@ const BooksLibrary = () => {
             compact
             onToggleShelf={handleToggleShelf}
             userShelfIds={userShelfIds}
+            returnTo={returnTo}
           />
         </>
       )}

@@ -19,7 +19,7 @@ import { getCurrentActorAccessState, hydrateBookAccessForUser, syncCurrentAccess
 import './index.css';
 
 const THEME_STORAGE_KEY = 'atlp-ui-theme';
-const VALID_THEMES = ['light', 'sepia', 'dark'];
+const VALID_THEMES = ['light', 'dark'];
 
 const RequireMember = ({ currentUser, children }) => {
   const location = useLocation();
@@ -51,7 +51,7 @@ const AppShell = ({ currentUser, onLogout, uiTheme, onThemeChange, onAuthSuccess
           <Route path="/books" element={<Navigate to="/desk" replace />} />
           <Route path="/meet" element={<MeetingAccessHub currentUser={currentUser} />} />
           <Route path="/threads" element={<ThreadAccessHub currentUser={currentUser} />} />
-          <Route path="/profile" element={<RequireMember currentUser={currentUser}><ProfilePage currentUser={currentUser} /></RequireMember>} />
+          <Route path="/profile" element={<RequireMember currentUser={currentUser}><ProfilePage currentUser={currentUser} onLogout={onLogout} /></RequireMember>} />
           <Route path="/settings" element={<RequireMember currentUser={currentUser}><SettingsPage uiTheme={uiTheme} onThemeChange={onThemeChange} /></RequireMember>} />
           <Route path="/read/:bookId" element={<RequireMember currentUser={currentUser}><ReadingRoom uiTheme={uiTheme} onThemeChange={onThemeChange} /></RequireMember>} />
           <Route path="/meet/:bookId" element={<MeetingHub />} />
@@ -68,7 +68,15 @@ const App = () => {
   const bootstrapStartedRef = useRef(false);
   const [uiTheme, setUiTheme] = useState(() => {
     const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return VALID_THEMES.includes(storedTheme) ? storedTheme : 'sepia';
+    if (VALID_THEMES.includes(storedTheme)) {
+      return storedTheme;
+    }
+
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    return prefersDark ? 'dark' : 'light';
   });
 
   useEffect(() => {
